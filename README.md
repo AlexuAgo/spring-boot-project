@@ -26,7 +26,7 @@ A Spring Boot REST API for managing software engineers. This project demonstrate
 - **PostgreSQL** (runtime)
 - **Maven** (build tool)
 - **SLF4J / Logback** 
-
+- **Docker / Docker Compose**
 ---
 
 ## Getting Started
@@ -42,13 +42,13 @@ A Spring Boot REST API for managing software engineers. This project demonstrate
 1. Clone the repository:
 
 ```
-git clone https://github.com/AlexuAgo/spring-boot-mini-project.git
+git clone https://github.com/AlexuAgo/spring-boot-project.git
 ```
 
 2. Navigate to the project directory
 
 ```
-cd spring-boot-mini-project
+cd spring-boot-project
 ```
 
 3. Update application.properties with your database credentials 
@@ -56,7 +56,7 @@ cd spring-boot-mini-project
 
 4. Make sure docker is running and then:
 ```
-docker -compose up -d
+docker compose up -d --build
 ```
 
 5. Run the application

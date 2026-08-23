@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -15,7 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional // ensures each test rolls back changes
+@ActiveProfiles("test")
+@Transactional
 public class SoftwareEngineerControllerTest {
 
     @Autowired
@@ -24,57 +27,60 @@ public class SoftwareEngineerControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    void testCreateAndGetEngineer() throws Exception {
-        SoftwareEngineerDTO engineer = new SoftwareEngineerDTO(null, "Matt", "SQL");
+    // The create endpoint returns an empty body, so we fetch the list
+    // afterward and match by name to recover the generated ID.
+    private Integer createEngineerAndGetId(String name, String techStack) throws Exception {
+        SoftwareEngineerDTO engineer = new SoftwareEngineerDTO(null, name, techStack);
 
-        // Create engineer
         mockMvc.perform(post("/api/v1/software_engineers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(engineer)))
                 .andExpect(status().isOk());
 
-        // Fetch all engineers to check creation
+        MvcResult result = mockMvc.perform(get("/api/v1/software_engineers"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var list = objectMapper.readTree(result.getResponse().getContentAsString());
+        for (var node : list) {
+            if (node.get("name").asText().equals(name)) {
+                return node.get("id").asInt();
+            }
+        }
+        throw new IllegalStateException("Created engineer not found in list response");
+    }
+
+    @Test
+    void testCreateAndGetEngineer() throws Exception {
+        createEngineerAndGetId("Matt", "SQL");
+
         mockMvc.perform(get("/api/v1/software_engineers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Alex"))
-                .andExpect(jsonPath("$[0].techStack").value("java"));
+                .andExpect(jsonPath("$[0].name").value("Matt"))
+                .andExpect(jsonPath("$[0].techStack").value("SQL"));
     }
 
     @Test
     void testGetEngineerById() throws Exception {
-        // First, create an engineer
-        SoftwareEngineerDTO engineer = new SoftwareEngineerDTO(null, "Alex", "Java");
-        mockMvc.perform(post("/api/v1/software_engineers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(engineer)))
-                .andExpect(status().isOk());
+        Integer id = createEngineerAndGetId("Alex", "Java");
 
-        // Fetch engineer by ID 1
-        mockMvc.perform(get("/api/v1/software_engineers/1"))
+        mockMvc.perform(get("/api/v1/software_engineers/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Alex"))
-                .andExpect(jsonPath("$.techStack").value("java"));
+                .andExpect(jsonPath("$.techStack").value("Java"));
     }
 
     @Test
     void testUpdateEngineer() throws Exception {
-        // Create engineer
-        SoftwareEngineerDTO engineer = new SoftwareEngineerDTO(null, "Alex", "Java");
-        mockMvc.perform(post("/api/v1/software_engineers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(engineer)))
-                .andExpect(status().isOk());
+        Integer id = createEngineerAndGetId("Alex", "Java");
 
-        // Update engineer
         SoftwareEngineerDTO updated = new SoftwareEngineerDTO(null, "Alex Updated", "Spring Boot");
-        mockMvc.perform(put("/api/v1/software_engineers/1")
+        mockMvc.perform(put("/api/v1/software_engineers/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk());
 
-        // Verify update
-        mockMvc.perform(get("/api/v1/software_engineers/1"))
+        mockMvc.perform(get("/api/v1/software_engineers/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Alex Updated"))
                 .andExpect(jsonPath("$.techStack").value("Spring Boot"));
@@ -82,20 +88,12 @@ public class SoftwareEngineerControllerTest {
 
     @Test
     void testDeleteEngineer() throws Exception {
-        // Create engineer
-        SoftwareEngineerDTO engineer = new SoftwareEngineerDTO(null, "Alex", "java");
-        mockMvc.perform(post("/api/v1/software_engineers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(engineer)))
-                .andExpect(status().isOk());
+        Integer id = createEngineerAndGetId("Alex", "java");
 
-        // Delete engineer (should return 204)
-        mockMvc.perform(delete("/api/v1/software_engineers/1"))
+        mockMvc.perform(delete("/api/v1/software_engineers/" + id))
                 .andExpect(status().isNoContent());
 
-        // Check it no longer exists
-        mockMvc.perform(get("/api/v1/software_engineers/1"))
+        mockMvc.perform(get("/api/v1/software_engineers/" + id))
                 .andExpect(status().isNotFound());
     }
-
 }
