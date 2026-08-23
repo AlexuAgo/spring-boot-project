@@ -5,11 +5,27 @@ services:
     environment:
       POSTGRES_USER: alex
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: alex
       PGDATA: /data/postgres
     volumes:
       - db:/data/postgres
     ports:
       - "5332:5432"
+    networks:
+      - db
+    restart: unless-stopped
+
+  app:
+    container_name: spring-boot-app
+    build: .
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/alex
+      SPRING_DATASOURCE_USERNAME: alex
+      SPRING_DATASOURCE_PASSWORD: password
+    ports:
+      - "8080:8080"
     networks:
       - db
     restart: unless-stopped
