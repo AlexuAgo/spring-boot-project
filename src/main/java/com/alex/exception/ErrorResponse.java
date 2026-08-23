@@ -1,4 +1,4 @@
-package com.alex;
+package com.alex.exception;
 
 import java.time.LocalDateTime;
 import java.util.Map;

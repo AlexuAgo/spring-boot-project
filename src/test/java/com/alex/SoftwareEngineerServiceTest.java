@@ -1,5 +1,9 @@
 package com.alex;
 
+import com.alex.dto.SoftwareEngineerDTO;
+import com.alex.entity.SoftwareEngineer;
+import com.alex.repository.SoftwareEngineerRepository;
+import com.alex.service.SoftwareEngineerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,7 @@
-package com.alex;
+package com.alex.controller;
 
+import com.alex.dto.SoftwareEngineerDTO;
+import com.alex.service.SoftwareEngineerService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

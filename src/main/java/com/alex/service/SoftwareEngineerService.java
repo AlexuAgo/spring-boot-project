@@ -1,6 +1,9 @@
-package com.alex;
+package com.alex.service;
 
 
+import com.alex.entity.SoftwareEngineer;
+import com.alex.dto.SoftwareEngineerDTO;
+import com.alex.repository.SoftwareEngineerRepository;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

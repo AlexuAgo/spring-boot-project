@@ -1,10 +1,9 @@
-package com.alex;
+package com.alex.repository;
 
+import com.alex.entity.SoftwareEngineer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 public interface SoftwareEngineerRepository
         extends JpaRepository<SoftwareEngineer, Integer>{

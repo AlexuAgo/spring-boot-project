@@ -1,4 +1,4 @@
-package com.alex;
+package com.alex.dto;
 
 public class SoftwareEngineerDTO {
 

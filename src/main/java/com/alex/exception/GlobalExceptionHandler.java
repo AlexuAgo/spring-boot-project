@@ -1,4 +1,4 @@
-package com.alex;
+package com.alex.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
